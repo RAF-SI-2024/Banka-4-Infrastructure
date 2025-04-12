@@ -1,0 +1,64 @@
+apiVersion: postgres-operator.crunchydata.com/v1beta1
+kind: PostgresCluster
+metadata:
+  name: banka-4
+  namespace: banka-4
+spec:
+  image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi9-17.4-2513
+  postgresVersion: 17
+  instances:
+    - name: instance1
+      replicas: 3
+      dataVolumeClaimSpec:
+        accessModes:
+        - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: 30Gi
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  postgres-operator.crunchydata.com/cluster: banka-4
+                  postgres-operator.crunchydata.com/instance-set: instance1
+  backups:
+    pgbackrest:
+      image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:ubi9-2.54.2-2513
+      repos:
+      - name: repo1
+        volume:
+          volumeClaimSpec:
+            accessModes:
+            - "ReadWriteOnce"
+            resources:
+              requests:
+                storage: 30Gi
+  proxy:
+    pgBouncer:
+      replicas: 2
+      image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbouncer:ubi9-1.24-2513
+      resources:
+        limits:
+          cpu: 200m
+          memory: 128Mi
+  users:
+    - name: user-service
+      password:
+        type: "AlphaNumeric"
+      databases:
+        - user-service
+      options: "SUPERUSER"
+    - name: stock-service
+      password:
+        type: "AlphaNumeric"
+      databases:
+        - stock-service
+      options: "SUPERUSER"
+    - name: arsen
+      password:
+        type: "AlphaNumeric"
+      options: "SUPERUSER"

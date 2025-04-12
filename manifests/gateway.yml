@@ -1,0 +1,50 @@
+# yipee
+# Copyright (C) 2025  Arsen Arsenović <aarsenovic8422rn@raf.rs>
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: banka-4-ingress-api
+  namespace: banka-4
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: banka-4.si.raf.edu.rs
+      http:
+        paths:
+          - pathType: ImplementationSpecific
+            path: "/api/stock(/|$)(.*)"
+            backend:
+              service:
+                name: stock-service
+                port:
+                  number: 8080
+          - pathType: ImplementationSpecific
+            path: "/api/exchange(/|$)(.*)"
+            backend:
+              service:
+                name: exchange-office
+                port:
+                  number: 8000
+          - pathType: ImplementationSpecific
+            path: "/api(/|$)(.*)"
+            backend:
+              service:
+                name: user-service
+                port:
+                  number: 8080

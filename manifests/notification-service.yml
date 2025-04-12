@@ -1,0 +1,59 @@
+# Kubernetes manifest for setting up the user service
+# Copyright (C) 2025  Arsen Arsenović <aarsenovic8422rn@raf.rs>
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: notification-service
+  name: notification-service
+  namespace: banka-4
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      containers:
+      - image: harbor.k8s.elab.rs/banka-4/notification-service:latest
+        imagePullPolicy: Always
+        name: notification-service
+        envFrom:
+          - secretRef:
+              name: mailer-configuration
+        env:
+          - name: SPRING_RABBITMQ_USERNAME
+            value: 'user'
+          - name: SPRING_RABBITMQ_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: banka-4-rabbitmq
+                key: rabbitmq-password
+          - name: SPRING_RABBITMQ_HOST
+            value: banka-4-rabbitmq.banka-4.svc.cluster.local
+          - name: APP_BASEURL
+            # Publicly-facing endpoint exposing our bank UI
+            value: https://banka-4.si.raf.edu.rs
+          - name: RABBITMQ_QUEUE_EMAIL_NAME
+            value: notification-queue
+          - name: RABBITMQ_EXCHANGE_EMAIL_NAME
+            value: notification-queue
+          - name: RABBITMQ_BINDING_EMAIL_NAME
+            value: notification-queue

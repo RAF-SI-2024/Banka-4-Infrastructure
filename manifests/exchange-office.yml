@@ -1,0 +1,79 @@
+# Kubernetes manifest for setting up the exchange office cache
+# Copyright (C) 2025  Arsen Arsenović <aarsenovic8422rn@raf.rs>
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: exchange-office
+  namespace: banka-4
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: nfs-csi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: exchange-office
+  name: exchange-office
+  namespace: banka-4
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: exchange-office
+  template:
+    metadata:
+      labels:
+        app: exchange-office
+    spec:
+      volumes:
+        - name: exchange-office-config
+          secret:
+            secretName: exchange-office-config
+        - name: exchange-office-pvc
+          persistentVolumeClaim:
+              claimName: exchange-office
+      containers:
+      - image: harbor.k8s.elab.rs/banka-4/exchange-office:latest
+        imagePullPolicy: Always
+        name: exchange-office
+        volumeMounts:
+          - mountPath: /usr/local/var/banka4_exchange-instance/config.py
+            name: exchange-office-config
+            subPath: config
+          - mountPath: /data
+            name: exchange-office-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: exchange-office
+  name: exchange-office
+  namespace: banka-4
+spec:
+  ports:
+  - port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: exchange-office
+  type: ClusterIP

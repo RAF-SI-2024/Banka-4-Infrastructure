@@ -1,0 +1,71 @@
+# Kubernetes manifest for setting up the stock service
+# Copyright (C) 2025  Arsen Arsenović <aarsenovic8422rn@raf.rs>
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: stock-service
+  name: stock-service
+  namespace: banka-4
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stock-service
+  template:
+    metadata:
+      labels:
+        app: stock-service
+    spec:
+      containers:
+      - image: harbor.k8s.elab.rs/banka-4/stock-service:latest
+        imagePullPolicy: Always
+        name: stock-service
+        env:
+          - name: SPRING_DATASOURCE_URL
+            valueFrom:
+              secretKeyRef:
+                name: banka-4-pguser-stock-service
+                key: jdbc-uri
+          - name: JWT_KEYS_VERIFICATION
+            valueFrom:
+              secretKeyRef:
+                name: jwt-secret
+                key: key
+          - name: BANKA4_SERVICES_USER
+            value: http://user-service.banka-4.svc:8080
+          - name: ALPHAVANTAGE_APIKEY
+            valueFrom:
+              secretKeyRef:
+                name: alphavantage
+                key: apikey
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: stock-service
+  name: stock-service
+  namespace: banka-4
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: stock-service
+  type: ClusterIP
