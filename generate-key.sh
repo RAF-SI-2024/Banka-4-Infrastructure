@@ -15,34 +15,36 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if ! kubectl get secret jwt-secret >/dev/null; then
+: "${RELEASE_NAME:=banka-4}"
+
+if ! kubectl get secret "${RELEASE_NAME}"-jwt-secret >/dev/null; then
     newkey="$(head --bytes $((256 / 8)) /dev/urandom | base64 -w0)"
     kubectl create secret \
-	    generic jwt-secret \
+	    generic "${RELEASE_NAME}"-jwt-secret \
 	    --from-literal=key="${newkey}" \
 	    -o yaml --dry-run=client \
 	| kubectl apply -f -
 fi
 
-if ! kubectl get secret alphavantage >/dev/null; then
+if ! kubectl get secret "${RELEASE_NAME}"-alphavantage >/dev/null; then
     read -p "AlphaVantage key? " av_key
     kubectl create secret \
-	    generic alphavantage \
+	    generic "${RELEASE_NAME}"-alphavantage \
 	    --from-literal=apikey="${av_key}" \
 	    -o yaml --dry-run=client \
 	| kubectl apply -f -
 fi
 
-if ! kubectl get secret mailer-configuration >/dev/null; then
+if ! kubectl get secret "${RELEASE_NAME}"-mailer-configuration >/dev/null; then
     kubectl create secret \
-	    generic mailer-configuration \
+	    generic "${RELEASE_NAME}"-mailer-configuration \
 	    --from-env-file=email-secret.conf \
 	    -o yaml --dry-run=client \
 	| kubectl apply -f -
 fi
 
 
-if ! kubectl get secret exchange-office-config >/dev/null; then
+if ! kubectl get secret "${RELEASE_NAME}"-exchange-office-config >/dev/null; then
     read -p "Exchange Rate API key? " er_key
     contents="\
 # -*- python -*-
@@ -51,9 +53,8 @@ EXCHANGERATE_API_KEY = \"${er_key}\"
 EXCHANGE_STORAGE_PATH = \"/data/exchanges.json\"
 "
     kubectl create secret \
-	    generic exchange-office-config \
+	    generic "${RELEASE_NAME}"-exchange-office-config \
 	    --from-file=config=/dev/stdin <<<"${contents}" \
 	    -o yaml --dry-run=client \
-	| kubectl apply -f - \
-x
+	| kubectl apply -f -
 fi

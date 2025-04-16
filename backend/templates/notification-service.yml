@@ -18,39 +18,39 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: notification-service
-  name: notification-service
-  namespace: banka-4
+    app: {{ .Release.Name }}-notification-service
+  name: {{ .Release.Name }}-notification-service
+  namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: notification-service
+      app: {{ .Release.Name }}-notification-service
   template:
     metadata:
       labels:
-        app: notification-service
+        app: {{ .Release.Name }}-notification-service
     spec:
       containers:
-      - image: harbor.k8s.elab.rs/banka-4/notification-service:latest
+      - image: harbor.k8s.elab.rs/banka-4/notification-service:{{ .Values.imageTag }}
         imagePullPolicy: Always
-        name: notification-service
+        name: {{ .Release.Name }}-notification-service
         envFrom:
           - secretRef:
-              name: mailer-configuration
+              name: {{ .Release.Name }}-mailer-configuration
         env:
           - name: SPRING_RABBITMQ_USERNAME
             value: 'user'
           - name: SPRING_RABBITMQ_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: banka-4-rabbitmq
+                name: {{ .Release.Name }}-rabbitmq
                 key: rabbitmq-password
           - name: SPRING_RABBITMQ_HOST
-            value: banka-4-rabbitmq.banka-4.svc.cluster.local
+            value: {{ .Release.Name }}-rabbitmq.{{ .Release.Namespace }}.svc.cluster.local
           - name: APP_BASEURL
             # Publicly-facing endpoint exposing our bank UI
-            value: https://banka-4.si.raf.edu.rs
+            value: https://{{ .Values.appDomain }}
           - name: RABBITMQ_QUEUE_EMAIL_NAME
             value: notification-queue
           - name: RABBITMQ_EXCHANGE_EMAIL_NAME

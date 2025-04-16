@@ -16,8 +16,8 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: exchange-office
-  namespace: banka-4
+  name: '{{ .Release.Name }}-exchange-office'
+  namespace: '{{ .Release.Namespace }}'
 spec:
   accessModes:
     - ReadWriteOnce
@@ -31,49 +31,49 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: exchange-office
-  name: exchange-office
-  namespace: banka-4
+    app: '{{ .Release.Name }}-exchange-office'
+  name: '{{ .Release.Name }}-exchange-office'
+  namespace: '{{ .Release.Namespace }}'
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: exchange-office
+      app: '{{ .Release.Name }}-exchange-office'
   template:
     metadata:
       labels:
-        app: exchange-office
+        app: '{{ .Release.Name }}-exchange-office'
     spec:
       volumes:
-        - name: exchange-office-config
+        - name: '{{ .Release.Name }}-exchange-office-config'
           secret:
             secretName: exchange-office-config
-        - name: exchange-office-pvc
+        - name: '{{ .Release.Name }}-exchange-office-pvc'
           persistentVolumeClaim:
-              claimName: exchange-office
+              claimName: '{{ .Release.Name }}-exchange-office'
       containers:
-      - image: harbor.k8s.elab.rs/banka-4/exchange-office:latest
+      - image: harbor.k8s.elab.rs/banka-4/exchange-office:{{ .Values.imageTag }}
         imagePullPolicy: Always
-        name: exchange-office
+        name: '{{ .Release.Name }}-exchange-office'
         volumeMounts:
           - mountPath: /usr/local/var/banka4_exchange-instance/config.py
-            name: exchange-office-config
+            name: '{{ .Release.Name }}-exchange-office-config'
             subPath: config
           - mountPath: /data
-            name: exchange-office-pvc
+            name: '{{ .Release.Name }}-exchange-office-pvc'
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: exchange-office
-  name: exchange-office
-  namespace: banka-4
+    app: '{{ .Release.Name }}-exchange-office'
+  name: '{{ .Release.Name }}-exchange-office'
+  namespace: '{{ .Release.Namespace }}'
 spec:
   ports:
   - port: 8000
     protocol: TCP
     targetPort: 8000
   selector:
-    app: exchange-office
+    app: '{{ .Release.Name }}-exchange-office'
   type: ClusterIP

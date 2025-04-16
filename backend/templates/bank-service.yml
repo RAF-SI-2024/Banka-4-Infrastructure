@@ -1,4 +1,4 @@
-# Kubernetes manifest for setting up the user service
+# Kubernetes manifest for setting up THE bank service
 # Copyright (C) 2025  Arsen Arsenović <aarsenovic8422rn@raf.rs>
 
 # This program is free software: you can redistribute it and/or modify
@@ -18,58 +18,65 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: user-service
-  name: user-service
-  namespace: banka-4
+    app: '{{ .Release.Name }}-bank-service'
+  name: '{{ .Release.Name }}-bank-service'
+  namespace: '{{ .Release.Namespace }}'
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: user-service
+      app: '{{ .Release.Name }}-bank-service'
   template:
     metadata:
       labels:
-        app: user-service
+        app: '{{ .Release.Name }}-bank-service'
     spec:
       containers:
-      - image: harbor.k8s.elab.rs/banka-4/user-service:latest
+      - image: harbor.k8s.elab.rs/banka-4/bank-service:{{ .Values.imageTag }}
         imagePullPolicy: Always
-        name: user-service
+        name: bank-service
         env:
           - name: SPRING_DATASOURCE_URL
             valueFrom:
               secretKeyRef:
-                name: banka-4-pguser-user-service
+                name: {{ .Release.Name }}-pguser-bank-service
                 key: jdbc-uri
           - name: SPRING_RABBITMQ_USERNAME
             value: 'user'
           - name: SPRING_RABBITMQ_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: banka-4-rabbitmq
+                name: {{ .Release.Name }}-rabbitmq
                 key: rabbitmq-password
           - name: SPRING_RABBITMQ_HOST
-            value: banka-4-rabbitmq.banka-4.svc.cluster.local
+            value: {{ .Release.Name }}-rabbitmq.{{ .Release.Namespace }}.svc.cluster.local
           - name: JWT_SECRET_KEY
             valueFrom:
               secretKeyRef:
-                name: jwt-secret
+                name: {{ .Release.Name }}-jwt-secret
                 key: key
           - name: JWT_EXPIRATION
             value: '180000'
+          - name: ALPHAVANTAGE_APIKEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-alphavantage
+                key: apikey
+          - name: SERVICES_EXCHANGE
+            value: {{ .Release.Name }}-exchange-office.{{ .Release.Namespace }}.svc.cluster.local
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: user-service
-  name: user-service
-  namespace: banka-4
+    app: {{ .Release.Name }}-bank-service
+  name: {{ .Release.Name }}-bank-service
+  namespace: {{ .Release.Namespace }}
 spec:
   ports:
   - port: 8080
     protocol: TCP
     targetPort: 8080
   selector:
-    app: user-service
+    app: {{ .Release.Name }}-bank-service
   type: ClusterIP

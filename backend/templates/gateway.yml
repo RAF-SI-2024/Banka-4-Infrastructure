@@ -17,34 +17,27 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: banka-4-ingress-api
-  namespace: banka-4
+  name: {{ .Release.Name }}-ingress-api
+  namespace: {{ .Release.Namespace }}
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   ingressClassName: nginx
   rules:
-    - host: banka-4.si.raf.edu.rs
+    - host: {{ .Values.appDomain }}
       http:
         paths:
-          - pathType: ImplementationSpecific
-            path: "/api/stock(/|$)(.*)"
-            backend:
-              service:
-                name: stock-service
-                port:
-                  number: 8080
           - pathType: ImplementationSpecific
             path: "/api/exchange(/|$)(.*)"
             backend:
               service:
-                name: exchange-office
+                name: {{ .Release.Name }}-exchange-office
                 port:
                   number: 8000
           - pathType: ImplementationSpecific
             path: "/api(/|$)(.*)"
             backend:
               service:
-                name: user-service
+                name: {{ .Release.Name }}-bank-service
                 port:
                   number: 8080
