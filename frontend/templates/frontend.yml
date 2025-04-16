@@ -18,36 +18,36 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: frontend
-  name: frontend
-  namespace: banka-4
+    app: {{ .Release.Name }}-frontend
+  name: {{ .Release.Name }}-frontend
+  namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: frontend
+      app: {{ .Release.Name }}-frontend
   template:
     metadata:
       labels:
-        app: frontend
+        app: {{ .Release.Name }}-frontend
     spec:
       containers:
-      - image: harbor.k8s.elab.rs/banka-4/frontend:latest
+      - image: harbor.k8s.elab.rs/banka-4/frontend:{{ .Values.imageTag }}
         imagePullPolicy: Always
-        name: frontend
+        name: {{ .Release.Name }}-frontend
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: frontend
-  name: frontend
-  namespace: banka-4
+    app: {{ .Release.Name }}-frontend
+  name: {{ .Release.Name }}-frontend
+  namespace: {{ .Release.Namespace }}
 spec:
   ports:
   - port: 8080
     protocol: TCP
     targetPort: 8080
   selector:
-    app: frontend
+    app: {{ .Release.Name }}-frontend
   type: ClusterIP

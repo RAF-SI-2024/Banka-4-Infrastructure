@@ -17,18 +17,18 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: banka-4-ingress-frontend
-  namespace: banka-4
+  name: {{ .Release.Name }}-ingress-frontend
+  namespace: {{ .Release.Namespace }}
 spec:
   ingressClassName: nginx
   rules:
-    - host: banka-4.si.raf.edu.rs
+    - host: {{ .Values.appDomain }}
       http:
         paths:
           - pathType: ImplementationSpecific
             path: "/"
             backend:
               service:
-                name: frontend
+                name: {{ .Release.Name }}-frontend
                 port:
                   number: 8080

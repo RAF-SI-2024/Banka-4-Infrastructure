@@ -1,8 +1,8 @@
 apiVersion: postgres-operator.crunchydata.com/v1beta1
 kind: PostgresCluster
 metadata:
-  name: banka-4
-  namespace: banka-4
+  name: '{{ .Release.Name }}'
+  namespace: '{{ .Release.Namespace }}'
 spec:
   image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi9-17.4-2513
   postgresVersion: 17
@@ -23,7 +23,7 @@ spec:
               topologyKey: kubernetes.io/hostname
               labelSelector:
                 matchLabels:
-                  postgres-operator.crunchydata.com/cluster: banka-4
+                  postgres-operator.crunchydata.com/cluster: '{{ .Release.Name }}'
                   postgres-operator.crunchydata.com/instance-set: instance1
   backups:
     pgbackrest:
@@ -46,17 +46,11 @@ spec:
           cpu: 200m
           memory: 128Mi
   users:
-    - name: user-service
+    - name: bank-service
       password:
         type: "AlphaNumeric"
       databases:
-        - user-service
-      options: "SUPERUSER"
-    - name: stock-service
-      password:
-        type: "AlphaNumeric"
-      databases:
-        - stock-service
+        - bank-service
       options: "SUPERUSER"
     - name: arsen
       password:
