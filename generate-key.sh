@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-: "${RELEASE_NAME:=banka-4}"
+: "${RELEASE_NAME:=banka-4-backend}"
 
 if ! kubectl get secret "${RELEASE_NAME}"-jwt-secret >/dev/null; then
     newkey="$(head --bytes $((256 / 8)) /dev/urandom | base64 -w0)"
