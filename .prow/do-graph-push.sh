@@ -17,6 +17,8 @@
 
 set -eux
 
+helm dependency build backend
+
 fail=
 helm lint backend || fail=true
 helm lint frontend || fail=true
