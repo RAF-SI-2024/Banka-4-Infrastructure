@@ -1,0 +1,39 @@
+# Build and push our graphs to our Harbor
+# Copyright (C) 2025  Arsen Arsenović <aarsenovic8422rn@raf.rs>
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# A prow job that builds CD images for effectively our entire backend
+
+postsubmits:
+  - name: post-banka-4-infra-build-and-push-graphs-build
+    always_run: true
+    decorate: true
+    max_concurrency: 1
+    branches:
+      - ^main$
+    labels:
+      preset-harbor-robot-push: "true"
+    spec:
+      containers:
+        - image: harbor.k8s.elab.rs/base-images/base:java-21-node-18-docker
+          command:
+            - /bin/bash
+            - -c
+            - |
+              start-docker.sh
+              docker login -u "$HARBOR_USERNAME" -p "$HARBOR_PASSWORD" harbor.k8s.elab.rs
+              .prow/do-graph-push.sh
+          securityContext:
+            privileged: true
+          imagePullPolicy: Always
