@@ -63,7 +63,7 @@ spec:
                 name: {{ .Release.Name }}-alphavantage
                 key: apikey
           - name: SERVICES_EXCHANGE
-            value: {{ .Release.Name }}-exchange-office.{{ .Release.Namespace }}.svc.cluster.local
+            value: http://{{ .Release.Name }}-exchange-office.{{ .Release.Namespace }}.svc.cluster.local:8000/
 ---
 apiVersion: v1
 kind: Service
