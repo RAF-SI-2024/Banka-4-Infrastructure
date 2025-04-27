@@ -2,5 +2,8 @@ dependencies:
 - name: rabbitmq
   repository: oci://registry-1.docker.io/bitnamicharts
   version: 15.5.3
-digest: sha256:006ed41c75e00b56df1efb8e741de2778054192cbffeccfe3bc23dd4d21acef2
-generated: "2025-04-16T20:04:15.74258303+02:00"
+- name: valkey
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 3.0.2
+digest: sha256:5ff1b4a8e361ba265481533e62ec4595a9b623fe7a3c00600fe6eff593427041
+generated: "2025-04-27T13:28:48.750278091+02:00"
