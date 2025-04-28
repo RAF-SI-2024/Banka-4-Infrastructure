@@ -45,10 +45,10 @@ spec:
         app: '{{ .Release.Name }}-exchange-office'
     spec:
       volumes:
-        - name: '{{ .Release.Name }}-exchange-office-config'
+        - name: exchange-office-config
           secret:
-            secretName: exchange-office-config
-        - name: '{{ .Release.Name }}-exchange-office-pvc'
+            secretName: '{{ .Release.Name }}-exchange-office-config'
+        - name: exchange-office-pvc
           persistentVolumeClaim:
               claimName: '{{ .Release.Name }}-exchange-office'
       containers:
@@ -57,10 +57,10 @@ spec:
         name: '{{ .Release.Name }}-exchange-office'
         volumeMounts:
           - mountPath: /usr/local/var/banka4_exchange-instance/config.py
-            name: '{{ .Release.Name }}-exchange-office-config'
+            name: exchange-office-config
             subPath: config
           - mountPath: /data
-            name: '{{ .Release.Name }}-exchange-office-pvc'
+            name: exchange-office-pvc
 ---
 apiVersion: v1
 kind: Service
