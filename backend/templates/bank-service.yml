@@ -31,6 +31,10 @@ spec:
       labels:
         app: '{{ .Release.Name }}-bank-service'
     spec:
+      volumes:
+        - name: interbank-config
+          secret:
+            secretName: '{{ .Release.Name }}-interbank-config'
       containers:
       - image: harbor.k8s.elab.rs/banka-4/bank-service:{{ .Values.imageTag }}
         imagePullPolicy: Always
@@ -68,6 +72,10 @@ spec:
             value: {{ .Release.Name }}-valkey-primary.{{ .Release.Namespace }}.svc.cluster.local
           - name: RAFEISEN_CACHE_VALKEY_PORT
             value: '6379'
+        volumeMounts:
+          - mountPath: /work/application.yml
+            name: interbank-config
+            subPath: interbank
 ---
 apiVersion: v1
 kind: Service
