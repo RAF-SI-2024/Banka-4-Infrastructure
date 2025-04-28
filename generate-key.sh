@@ -58,3 +58,11 @@ EXCHANGE_STORAGE_PATH = \"/data/exchanges.json\"
 	    -o yaml --dry-run=client \
 	| kubectl apply -f -
 fi
+
+if ! kubectl get secret "${RELEASE_NAME}"-interbank-config >/dev/null; then
+    kubectl create secret \
+	    generic "${RELEASE_NAME}"-interbank-config \
+	    --from-file=config="${RELEASE_NAME}"-config.yml \
+	    -o yaml --dry-run=client \
+	| kubectl apply -f -
+fi
